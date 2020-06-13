@@ -83,8 +83,8 @@
         </el-form-item>
         <el-form-item label="商品图片">
           <el-upload
-            action="http://127.0.0.1:5000/goods/goods_img_upload"
-            list-type="picture-card"
+            :action="goodsupload"
+             list-type="picture-card"
             :file-list="fileList"
             :multiple="true"
             :on-remove="handleRemove"
@@ -114,11 +114,13 @@ import {
   LIST_GOODS,
   DEL_GOODS_LIST,
   CATEGORIES_GOODS,
-  EDIT_GOODS
+  EDIT_GOODS,
+  GOODS_UPLOAD
 } from "@/api/apis";
 export default {
   data() {
     return {
+      goodsupload:GOODS_UPLOAD,
       tableData: [],
       currentPage: 1,
       pageSize: 8,
@@ -169,6 +171,7 @@ export default {
     // 换页
     handleCurrentChange(val) {
       this.goodslist(val);
+       this.currentPage = val;
     },
     handlePictureCardPreview(file) {
       this.dialogImageUrl = file.url;
@@ -181,7 +184,7 @@ export default {
     // 删除图片
     handleRemove(file, fileList) {
       let arr = fileList.map(i => i.url.substr(44));
-      console.log(arr);
+      
       
       this.imgAll = arr;
     },
@@ -189,11 +192,16 @@ export default {
     handleEdit(row) {
       this.obj = JSON.parse(JSON.stringify(row));
       this.imgAll = [...this.obj.imgUrl];
-      this.imgAll.forEach(i =>
-        this.fileList.push({
-          url: this.host + i
-        })
-      );
+      this.fileList=this.imgAll.map(i=>{
+        return {url: this.host + i}
+      })
+      
+      // this.imgAll.forEach(i =>
+      //   this.fileList.push({
+      //     url: this.host + i
+      //   })
+      // );
+      // this.fileList=""
       // console.log(this.fileList);
       this.dialogFormVisible = true;
     },
@@ -213,7 +221,22 @@ export default {
     },
     // 删除
     handleDelete(row) {
+       if (this.total % this.pageSize == 1) {
       this.$confirm("此操作将永久删除该数据, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      }).then(() => {
+        DEL_GOODS_LIST(row.id).then(() => {
+          this.goodslist(this.currentPage-1);
+          this.$message({
+            type: "success",
+            message: "删除成功!"
+          });
+        });
+      });
+      }else{
+        this.$confirm("此操作将永久删除该数据, 是否继续?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning"
@@ -226,6 +249,7 @@ export default {
           });
         });
       });
+      }
     },
     // 初始化
     goodslist(page) {

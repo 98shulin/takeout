@@ -2,7 +2,7 @@
   <el-container>
     <el-aside width="200px">
       <h3>
-        <img src="../assets/images/head.jpg" />外卖商家中心
+        <img src="../assets/images/head.jpg" />千禧管理中心
       </h3>
       <el-menu
         :default-active="defaultActive"

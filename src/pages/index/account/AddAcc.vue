@@ -10,8 +10,7 @@
       </el-form-item>
       <el-form-item label="用户组">
         <el-select v-model="userGroup" placeholder="选择用户组">
-          <el-option label="超级管理员" value="超级管理员"></el-option>
-          <el-option label="普通管理员" value="普通管理员"></el-option>
+          <el-option v-for="item in userGroups" :key="item" :label="item" :value="item"></el-option>
         </el-select>
       </el-form-item>
       <el-form-item>
@@ -26,6 +25,7 @@ import { Add_ACC } from "@/api/apis";
 export default {
   data() {
     return {
+      userGroups:['超级管理员','普通管理员'],
       acc: "",
       pwd: "",
       userGroup: "",
@@ -46,7 +46,7 @@ export default {
         } else {
           this.$message({
             showClose: true,
-            message: "账号或密码不能为空,用户组不能不选",
+            message: "账号或密码不能为空,用户组必选",
             type: "warning"
           });
         }

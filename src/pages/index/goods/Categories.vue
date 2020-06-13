@@ -95,13 +95,27 @@ export default {
     // 编辑
     handleEdit(row) {
       console.log(row);
-      
       row.fl = !row.fl;
     },
   
     // 删除
     handleDelete(row) {
+       if (this.total % this.pageSize == 1) {
       this.$confirm("此操作将永久删除该数据, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      }).then(() => {
+        DEL_GOODS(row.id).then(() => {
+          this.newtable(this.currentPage-1);
+          this.$message({
+            type: "success",
+            message: "删除成功!"
+          });
+        });
+      });
+       }else{
+          this.$confirm("此操作将永久删除该数据, 是否继续?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning"
@@ -114,6 +128,7 @@ export default {
           });
         });
       });
+       }
     },
     // 每页条数
     handleSizeChange(val) {
@@ -122,6 +137,7 @@ export default {
     },
     // 跳转页码
     handleCurrentChange(val) {
+      this.currentPage=val
       this.newtable(val);
     },
       // 保存

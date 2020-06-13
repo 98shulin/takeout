@@ -2,7 +2,7 @@
   <div class="store">
     <div class="store-top">
       <h4>店铺管理</h4>
-      <el-button type="primary" @click="keep(data)">保存</el-button>
+      <el-button type="primary" @click="keep">保存</el-button>
     </div>
     <el-form label-width="80px">
       <el-form-item label="店铺名称">
@@ -14,29 +14,28 @@
       <el-form-item label="店铺头像">
         <el-upload
           class="avatar-uploader"
-          action="http://127.0.0.1:5000/shop/upload"
+          :action="shopupload"
           :show-file-list="false"
           :on-success="handleAvatarSuccess"
           :before-upload="beforeAvatarUpload"
         >
-          <img v-if="imageUrl" :src="host+imageUrl" class="avatar" />
+          <img v-if="data.avatar" :src="shopuploadimg+data.avatar" class="avatar" />
           <i v-else class="el-icon-plus avatar-uploader-icon"></i>
         </el-upload>
       </el-form-item>
       <el-form-item label="店铺图片">
         <el-upload
-          action="http://127.0.0.1:5000/shop/upload"
+          :action="shopupload"
           list-type="picture-card"
-          :on-preview="handlePictureCardPreview"
           :on-remove="handleRemove"
           :on-success="Success"
           :file-list="fileList"
         >
           <i class="el-icon-plus"></i>
-         
         </el-upload>
-        <el-dialog :visible.sync="dialogVisible" v-if="true"> 
-          <img width="100%" v-for="i in data.pics" :key="i" :src="i" alt /></el-dialog>
+        <el-dialog :visible.sync="dialogVisible" v-if="true">
+          <img width="100%" :src="data.pics" alt />
+        </el-dialog>
       </el-form-item>
       <el-form-item label="配送费">
         <el-input v-model="data.deliveryPrice" placeholder="配送费"></el-input>
@@ -57,12 +56,8 @@
         <el-input v-model="data.sellCount" placeholder="销量"></el-input>
       </el-form-item>
       <el-form-item label="活动">
-        <el-checkbox-group v-model="supports">
-          <el-checkbox label="在线支付满28立减5" name="type"></el-checkbox>
-          <el-checkbox label="VC无限橙果汁全场8折" name="type"></el-checkbox>
-          <el-checkbox label="单人精彩套餐" name="type"></el-checkbox>
-          <el-checkbox label="特价饮品8折抢购" name="type"></el-checkbox>
-          <el-checkbox label="单人特色套餐" name="type"></el-checkbox>
+        <el-checkbox-group v-model="data.supports">
+          <el-checkbox v-for="item in checks" :key="item" :label="item" name="type"></el-checkbox>
         </el-checkbox-group>
       </el-form-item>
       <el-form-item label="营业时间">
@@ -79,65 +74,77 @@
   </div>
 </template>
 <script>
-import { INFO_SHOP, EDIT_SHOP } from "@/api/apis";
+import { INFO_SHOP, EDIT_SHOP, SHOP_UPLOAD, SHOP_UPLOAD_IMG } from "@/api/apis";
 export default {
   data() {
     return {
-      data: "",
-      supports: [],
+      data: {
+        id: "",
+        name: "",
+        bulletin: "",
+        avatar: "",
+        deliveryPrice: "",
+        deliveryTime: "",
+        description: "",
+        score: "",
+        sellCount: "",
+        supports: "",
+        date: "",
+        pics: ""
+      }, //初始化对象
+      shopupload: SHOP_UPLOAD, //店铺图片上传接口
+      shopuploadimg: SHOP_UPLOAD_IMG, //店铺图片拼接接口
+      checks: [
+        "在线支付满28立减5",
+        "VC无限橙果汁全场8折",
+        "单人精彩套餐",
+        "特价饮品8折抢购",
+        "单人特色套餐"
+      ], //循环活动数组
       fileList: [],
-      imgAll: [],
-      imageUrl: "",
-      dialogImageUrl: "",
       dialogVisible: false,
-      host: "http://127.0.0.1:5000/upload/shop/"
-      // da: { id: localStorage.shopid }
     };
   },
   methods: {
-    keep(d) {
-      EDIT_SHOP(
-        d.id,
-        d.name,
-        d.bulletin,
-        this.imageUrl,
-        d.deliveryPrice,
-        d.deliveryTime,
-        d.description,
-        d.score,
-        d.sellCount,
-        JSON.stringify(d.supports),
-        JSON.stringify(this.imgAll),
-        JSON.stringify(d.date)
-      ).then(res => {
-        INFO_SHOP().then(res => {
-          this.data = res.data.data;
-          this.supports = [...this.data.supports];
-          this.imageUrl = res.data.data.avatar;
+    // 保存 
+    keep() {
+      let newdata={...this.data}
+      newdata.supports=JSON.stringify(newdata.supports)
+      newdata.pics=JSON.stringify(newdata.pics)
+      newdata.date=JSON.stringify(newdata.date)
+      // console.log(newdata);
+      EDIT_SHOP(newdata).then(() => {
+        this.$message({
+          showClose: true,
+          message: "恭喜你,修改成功",
+          type: "success"
         });
+        // INFO_SHOP().then(res => {
+        //   this.data = res.data.data;
+        //   // this.data.supports = [...this.data.supports];
+        //   // this.imageUrl = res.data.data.avatar;
+        // });
       });
     },
-    handleChange(value) {
-      console.log(value);
-    },
-    // 删除图片
-    handleRemove(file, fileList) {
-      // this.fileList=fileList
-      let arr = fileList.map(i => i.url.substr(34));
-      this.imgAll = arr;
-    },
-    handlePictureCardPreview(file) {
-      this.dialogImageUrl = file.url;
-      this.dialogVisible = true;
-    },
-    // 店铺头像 上传成功
+      // 店铺头像 上传成功
     handleAvatarSuccess(res) {
-      this.imageUrl = res.imgUrl;
+       this.data.avatar=res.imgUrl
     },
     // 店铺图片上传成功
     Success(res) {
-      this.imgAll.push(res.imgUrl);
+      this.data.pics=this.data.pics.concat(res.imgUrl)
+      // console.log(this.data.pics);
+      
     },
+    // 删除图片
+    handleRemove(file) {
+      // this.fileList=fileList
+      let a = file.url.substr(file.url.lastIndexOf('/')+1);
+      // this.imgAll = arr;
+      this.data.pics.splice(this.data.pics.indexOf(a),1)
+  },
+  
+    
     beforeAvatarUpload(file) {
       const isJPG = file.type === "image/jpeg";
       const isLt2M = file.size / 1024 / 1024 < 2;
@@ -154,20 +161,13 @@ export default {
   created() {
     INFO_SHOP().then(res => {
       this.data = res.data.data;
-      this.supports = [...this.data.supports];
-      this.imageUrl = res.data.data.avatar;
-      this.imgAll=[...this.data.pics]
-      // console.log(this.imgAll);  
-      this.imgAll.forEach(i =>
-        this.fileList.push({
-          url: this.host + i
-        })
-      );
+      this.fileList = this.data.pics.map(img => {
+        return { url: this.shopuploadimg + img };
+      });
     });
   }
 };
 </script>
-
 <style lang="less" scoped>
 .store {
   background-color: #fff;

@@ -7,12 +7,12 @@
         <el-input v-model="form.name" placeholder="商品名称"></el-input>
       </el-form-item>
       <el-form-item label="商品分类">
-        <el-select v-model="form.region" placeholder="商品分类" >
+        <el-select v-model="form.region" placeholder="商品分类">
           <el-option v-for="item in listgoods" :key="item.index" :value="item.cateName"></el-option>
         </el-select>
       </el-form-item>
       <el-form-item label="商品价格">
-        <el-input-number v-model="num" @change="handleChange" :min="50" :max="500" ></el-input-number>
+        <el-input-number v-model="num" :min="50" :max="500"></el-input-number>
       </el-form-item>
       <el-form-item label="商品图片">
         <el-upload
@@ -37,17 +37,17 @@
 </template>
 
 <script>
-import { CATEGORIES_GOODS ,ADD_GOODS} from "@/api/apis";
+import { CATEGORIES_GOODS, ADD_GOODS } from "@/api/apis";
 export default {
   data() {
     return {
       form: {
         name: "",
-        region: '',
-        desc: "",
+        region: "",
+        desc: ""
       },
-      imgAll:[],
-      listgoods:'',
+      imgAll: [],
+      listgoods: "",
       dialogImageUrl: "",
       dialogVisible: false,
       num: 50
@@ -55,20 +55,28 @@ export default {
   },
   methods: {
     onSubmit() {
-      ADD_GOODS(this.form.name,this.form.region,this.num,this.imgAll,this.form.desc).then(()=>{
-       this.form.name=''
-       this.form.region=''
-       this.num=''
-       this.imgAll=[]
-       this.form.desc=''
-      })
+      ADD_GOODS(
+        this.form.name,
+        this.form.region,
+        this.num,
+        this.imgAll,
+        this.form.desc
+      ).then(res => {
+        if (res.data.code == 0) {
+          this.$message({
+            type: "success",
+            message: "添加成功!"
+          })
+        
+        }else{
+          this.$message.error('每一项都必填哦！');
+        }
+      });
     },
-    handleChange(value) {
-      console.log(value);
-    },
-    handleAvatarSuccess(res){
-         this.imgAll.push(res.imgUrl)    
-    },
+
+    handleAvatarSuccess(res) {
+      this.imgAll.push(res.imgUrl);
+    }
     // handleRemove(file, fileList) {
     //   console.log(file, fileList);
     // },
@@ -77,10 +85,10 @@ export default {
     //   this.dialogVisible = true;
     // },
   },
-  created () {
-    CATEGORIES_GOODS().then(res=>{
-      this.listgoods=res.data.categories
-    })
+  created() {
+    CATEGORIES_GOODS().then(res => {
+      this.listgoods = res.data.categories;
+    });
   }
 };
 </script>
@@ -98,7 +106,7 @@ export default {
     text-indent: 20px;
     border-bottom: 1px solid #f0f2f5;
   }
-  .el-form{
+  .el-form {
     width: 460px;
     padding: 20px;
   }

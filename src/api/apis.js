@@ -1,5 +1,14 @@
 import axios from 'axios'
-axios.defaults.baseURL = 'http://127.0.0.1:5000'
+// ip地址 
+const IP='http://127.0.0.1:5000'
+// 店铺上传图片接口
+export const SHOP_UPLOAD =IP+'/shop/upload'
+// 商品上传接口 
+export const GOODS_UPLOAD = IP+'/goods/goods_img_upload'
+// 店铺图片渲染 
+export const SHOP_UPLOAD_IMG =IP+'/upload/shop/'
+
+axios.defaults.baseURL = IP
 
 // 1. 登录接口
 // account:用户名
@@ -57,7 +66,7 @@ export const EDIT_ORDER = (id, orderNo, orderTime, phone, consignee, deliverAddr
 export const INFO_SHOP = () => axios.get('/shop/info')
 
 //28.店铺内容修改
-export const EDIT_SHOP = (id, name, bulletin, avatar, deliveryPrice, deliveryTime, description, score, sellCount, supports,pics,date) => axios.post('/shop/edit', { id, name, bulletin, avatar, deliveryPrice, deliveryTime, description, score, sellCount, supports,pics,date})
+export const EDIT_SHOP = (params) => axios.post('/shop/edit', params)
 //29. 首页报表
 export const ORDER_TOTALDATA = () => axios.get('/order/totaldata')
 //30. 订单统计

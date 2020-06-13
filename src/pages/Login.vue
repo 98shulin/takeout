@@ -1,7 +1,7 @@
 <template>
   <div class="main">
     <div class="login">
-      <h3>外卖管理系统</h3>
+      <h3>千禧餐饮管理系统</h3>
       <p>
         <span class="el-icon-user-solid left-icon"></span>
         <input type="text" placeholder="请输入管理员账号" v-model="acc" />

@@ -29,7 +29,7 @@
       :total="total"
     ></el-pagination>
     <div style="margin: 10px">
-      <el-button type="danger" @click="toggleSelection(multipleSelection)">批量删除</el-button>
+      <el-button type="danger" @click="bulkdelete">批量删除</el-button>
       <el-button type="primary" @click="toggleSelection()">取消选择</el-button>
     </div>
     <el-dialog title="修改用户" :visible.sync="dialogFormVisible">
@@ -97,19 +97,29 @@ export default {
       return times;
     },
     //批量删除
-    toggleSelection(rows) {
-      if (rows) {
-        let ids = [];
-        for (let obj of rows) {
-          ids.push(obj.id);
+    bulkdelete() {
+      // let pages=this.currentPage
+      if (this.total % this.pageSize == this.multipleSelection.length|| Math.ceil(this.total / this.pageSize)==this.currentPage&&this.currentPage!=1) {
+        if (this.multipleSelection.length == 0) {
+          this.$message.error("你没有选,请选了再操作");
+        } else {
+          BATCHDE_ACC(JSON.stringify(this.multipleSelection)).then(() => {
+            if (confirm("删除不可逆，请谨慎")) {
+              this.initialization(--this.currentPage);
+            }
+          });
         }
-        BATCHDE_ACC(JSON.stringify(ids)).then(() => {
-          if (confirm("删除不可逆，请谨慎")) {
-            this.initialization(this.currentPage);
-          }
-        });
+   
       } else {
-        this.$refs.multipleTable.clearSelection();
+        if (this.multipleSelection.length == 0) {
+          this.$message.error("你没有选,请选了再操作");
+        } else {
+          if (confirm("删除不可逆，请谨慎")) {
+            BATCHDE_ACC(JSON.stringify(this.multipleSelection)).then(() => {
+              this.initialization(this.currentPage);
+            });
+          }
+        }
       }
     },
     //每页显示条数
@@ -119,11 +129,13 @@ export default {
     },
     // 当前页
     handleCurrentChange(val) {
+      this.currentPage = val;
       this.initialization(val);
     },
     // 多选框发生变化
     handleSelectionChange(val) {
-      this.multipleSelection = val;
+      this.multipleSelection = val.map(i => i.id);
+      // console.log(this.multipleSelection.length);
     },
     //编辑
     handleEdit(row) {
@@ -140,11 +152,19 @@ export default {
     },
     //删除
     handleDelete(row) {
-      DEL_ACC(row.id).then(() => {
-        if (confirm("删除不可逆，请谨慎")) {
-          this.initialization(this.currentPage);
-        }
-      });
+      if (this.total % this.pageSize == 1) {
+        DEL_ACC(row.id).then(() => {
+          if (confirm("删除不可逆，请谨慎")) {
+            this.initialization(this.currentPage - 1);
+          }
+        });
+      } else {
+        DEL_ACC(row.id).then(() => {
+          if (confirm("删除不可逆，请谨慎")) {
+            this.initialization(this.currentPage);
+          }
+        });
+      }
     },
     // 封装初始化
     initialization(currentPage) {

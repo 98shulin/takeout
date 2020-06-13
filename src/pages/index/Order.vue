@@ -160,6 +160,7 @@ export default {
     },
     handleCurrentChange(val) {
       this.orserlist(val);
+      this.currentPage = val;
     },
     // 查看
     handleClick(row) {
@@ -221,7 +222,7 @@ export default {
       );
       SEARCH_ORDER(
         1,
-        6,
+        this.pageSize,
         this.formInline.orderNo,
         this.formInline.consignee,
         this.formInline.phone,
